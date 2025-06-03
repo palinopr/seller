@@ -1,0 +1,2806 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c60a001c-3699-4cb1-94da-84948fefcd33",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-3060, -1125],
+      "id": "1aff5323-24ae-4343-892d-8d0f1374c8ea",
+      "name": "Webhook1",
+      "webhookId": "c60a001c-3699-4cb1-94da-84948fefcd33"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-640, -1425],
+      "id": "d8d7707e-00e6-4c50-9e0a-e74fdac05c66",
+      "name": "Get Contact Profile",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/conversations/search?contactId={{ $('Edit Fields').first().json.contactId }}&locationId={{ $('Edit Fields').first().json.config.locationId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-420, -1850],
+      "id": "1f383624-4e31-416e-8b86-73d523e2b427",
+      "name": "Get All Conversations",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "custom-fields",
+              "name": "customFields",
+              "value": "={{ (() => {\n  const contact = $('Get Contact Profile').first().json.contact || {};\n  const fields = {};\n  \n  // Complete mapping of ALL your GHL custom field IDs\n  const fieldMapping = {\n    'pXBtZVTCeSbt4IkPkbMJ': 'goal',\n    'yDZaxGgGo3R5FP5mLvpF': 'budget',\n    'CRAFCrSWnEGAoFRkglel': 'last_score',\n    'u4Ie3vKhim879KfHJmmq': 'last_intent',\n    'wam8OzQqDjdxqNfogt5w': 'business_type',\n    'wwEbLQuCDLFclla7tTrw': 'urgency_level',\n    'rMel3CO1RPeCOtW0BBvU': 'preferred_day',\n    'ca3GZWcuB5TDGoMeXDOD': 'preferred_time',\n    'jblcWnjItD7KOZ2FkAPd': 'verified_name',\n    'ZIURA2xgUUGcpltqcZRF': 'name_confirmed',\n    'ca4XEOerqDXpVOICnYPP': 'message_count'\n  };\n  \n  // Process custom fields from contact\n  if (contact.customFields && Array.isArray(contact.customFields)) {\n    contact.customFields.forEach(field => {\n      const fieldName = fieldMapping[field.id];\n      if (fieldName && field.value !== undefined && field.value !== null) {\n        // Always store as string for consistency\n        fields[fieldName] = String(field.value);\n      }\n    });\n  }\n  \n  // Ensure all expected fields exist with defaults\n  fields.goal = fields.goal || '';\n  fields.budget = fields.budget || '';\n  fields.last_score = fields.last_score || '0';\n  fields.last_intent = fields.last_intent || 'UNKNOWN';\n  fields.business_type = fields.business_type || 'NO_MENCIONADO';\n  fields.urgency_level = fields.urgency_level || 'NO_EXPRESADO';\n  fields.preferred_day = fields.preferred_day || '';\n  fields.preferred_time = fields.preferred_time || '';\n  fields.message_count = fields.message_count || '0';\n  fields.verified_name = fields.verified_name || '';\n  fields.name_confirmed = fields.name_confirmed || 'false';\n  \n  return fields;\n})() }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-420, -1650],
+      "id": "53d11e33-3bb1-4703-855b-8ad07bffdf68",
+      "name": "Get Custom Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tags",
+              "name": "tags",
+              "value": "={{ $('Get Contact Profile').first().json.contact.tags || [] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-420, -1350],
+      "id": "838d7cd6-592e-42f3-b699-cd77cdf547f7",
+      "name": "Get Tags"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/opportunities/search?contact_id={{ $('Edit Fields').first().json.contactId }}&location_id={{ $('Edit Fields').first().json.config.locationId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-420, -1150],
+      "id": "1743da51-5d32-4b62-bcf3-68b9202bd106",
+      "name": "Get Opportunities",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-media-url",
+              "leftValue": "={{ $json.message.messageType }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-2620, -550],
+      "id": "84792836-adfe-4e40-b20c-181a3bed41dd",
+      "name": "Image URL Available?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "media-error-msg",
+              "name": "errorMessage",
+              "value": "Media messages are not supported in this workflow",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2400, -550],
+      "id": "711340ed-d9d3-4fdb-ad0b-8bb110d13607",
+      "name": "Media Error"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Edit Fields').first().json.message.chatId }}",
+        "messageData": "={{ JSON.stringify($('Edit Fields').first().json.message) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-2400, -750],
+      "id": "96a04da0-d744-4994-923d-b65c1e72d0f3",
+      "name": "push mensaje",
+      "credentials": {
+        "redis": {
+          "id": "wRs5oYkdSIhlaZDY",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [-2180, -750],
+      "id": "09e97662-375e-4790-acd1-dcda6d334561",
+      "name": "Wait",
+      "webhookId": "39be8185-9563-41b4-84d8-3f7650c1b4bf",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "message",
+        "key": "={{ $('Edit Fields').first().json.message.chatId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-1960, -750],
+      "id": "1126fee8-db0b-4c17-b4c6-524fd21d8bf7",
+      "name": "obtener todos mensajes",
+      "credentials": {
+        "redis": {
+          "id": "wRs5oYkdSIhlaZDY",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-duplicate",
+              "leftValue": "={{ $json.message.length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-1740, -750],
+      "id": "7efef247-ab9c-4840-96ae-3b9ed373a1fd",
+      "name": "Check Duplicate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "skip-msg",
+              "name": "skipMessage",
+              "value": "Duplicate message detected - workflow skipped",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-1520, -750],
+      "id": "2620d222-fcdb-40c2-9cfd-1ea3c934d99a",
+      "name": "Skip Flow"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Edit Fields').first().json.message.chatId }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-1520, -950],
+      "id": "41132e6e-f159-45fa-a928-0c238f71670c",
+      "name": "borrar todos mensajes",
+      "credentials": {
+        "redis": {
+          "id": "wRs5oYkdSIhlaZDY",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [-1300, -950],
+      "id": "07d30fe4-ace9-489a-8c54-a0f3e774f6af",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.parse($json.message) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-1080, -950],
+      "id": "f9c72bb7-e53b-4553-be2a-effe6990a2ec",
+      "name": "Json Parse"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "messageTimeStamp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [-860, -950],
+      "id": "589ebb1f-0c1e-418c-a06e-f39334b65aca",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "messageContent",
+              "renameField": true,
+              "outputFieldName": "messages"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [-640, -950],
+      "id": "44df3642-600f-4883-b2e0-831cc2d61946",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2599831-cc84-4aa6-acf7-77ed624f72ab",
+              "name": "content",
+              "value": "={{ $json.messages && $json.messages.length > 0 ? $json.messages.join(\"\\n\") : \"Sin mensajes previos\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-420, -950],
+      "id": "1ba8c98f-5351-495e-a775-ff0174072d94",
+      "name": "mensaje"
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [-200, -1363],
+      "id": "eeb300c2-0576-4076-ab76-770ac2c2e6f5",
+      "name": "Build Context"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FULL CONTEXT:\nMessage: {{ $json.currentMessage }}\nPrevious Score: {{ $json.previous_score }}\nPrevious Intent: {{ $json.previous_intent }}\nConversation Count: {{ $json.conversation_count }}\nHas Hot Tag: {{ $json.has_hot_tag }}\nHas Opportunity: {{ $json.has_opportunity }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Analiza este mensaje y clasifica la intención principal. DEVUELVE EXACTAMENTE ESTE JSON con valores numéricos para scoring:  {\"primary_intent\": \"CATEGORIA_EXACTA\", \"confidence\": 0.0-1.0, \"intent_strength\": \"HIGH/MEDIUM/LOW\", \"buying_signals\": [], \"intent_score\": X}  REGLA CRÍTICA: Si Previous Intent es URGENTE/LISTO_COMPRAR/CERRAR_AHORA (score 8+) y el mensaje actual es solo información solicitada (email, nombre, teléfono), MANTÉN el Previous Intent. NO downgrades a INFORMACION.  Previous Intent: {{ $json.previous_intent }} Previous Score: {{ $json.previous_score }}  CATEGORÍAS VÁLIDAS: - INFORMACION (score: 2) - SOLO si es primera interacción o exploración inicial - EXPLORANDO (score: 3) - COMPARANDO (score: 4) - PRESUPUESTO (score: 5) - PROBLEMA_ESPECIFICO (score: 6) - LISTO_COMPRAR (score: 8) - URGENTE (score: 9) - CERRAR_AHORA (score: 10)"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [460, -1900],
+      "id": "1b4dbcff-0e16-4e5c-b8fe-85395004e054",
+      "name": "primary_intent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FULL CONTEXT:\nMessage: {{ $json.currentMessage }}\nPrevious Business: {{ $json.previous_business }}\nConversation Count: {{ $json.conversation_count }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Detecta el tipo de negocio mencionado. REGLA CRÍTICA: Si previous_business NO es 'NO_MENCIONADO' o 'OTRO' y el mensaje actual NO menciona explícitamente un tipo de negocio diferente, DEBES mantener el previous_business.\n\nPrevious business: {{ $json.previous_business }}\n\nDEVUELVE EXACTAMENTE ESTE JSON:\n{\"business_type\": \"TIPO_EXACTO\", \"business_size\": \"TAMAÑO\", \"confidence\": 0.0-1.0, \"business_score\": X}\n\nCATEGORÍAS Y SCORES:\n- RESTAURANTE (score: 7) - palabras: restaurante, resto, comida, cocina, meseros, reservas, mesas\n- INMOBILIARIA (score: 7) - palabras: inmuebles, propiedades, bienes raíces, casas\n- SALUD_BELLEZA (score: 6) - palabras: clínica, spa, estética, salón, belleza\n- SERVICIOS (score: 5) - palabras: consultoría, agencia, despacho\n- RETAIL (score: 6) - palabras: tienda, comercio, venta, productos\n- OTRO (score: 2) - cuando se menciona un negocio pero no encaja\n- NO_MENCIONADO (score: 0) - cuando NO se menciona ningún tipo de negocio\n\nIMPORTANTE: Si previous_business = '{{ $json.previous_business }}' y NO es NO_MENCIONADO/OTRO, úsalo como business_type a menos que el mensaje mencione explícitamente otro tipo."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [460, -1400],
+      "id": "707ed665-6d50-4ec4-976b-2130ac884a5a",
+      "name": "business_type"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=FULL CONTEXT:\nMessage: {{ $json.currentMessage }}\nHas Opportunity: {{ $json.has_opportunity }}\nPrevious Score: {{ $json.previous_score }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Detecta el nivel de urgencia. DEVUELVE ÚNICAMENTE ESTE JSON con score numérico:  {\"urgency_level\": \"NIVEL_EXACTO\", \"pain_points\": [\"punto1\", \"punto2\"], \"decision_authority\": \"HIGH/MEDIUM/LOW\", \"urgency_score\": X}  CONTEXTO IMPORTANTE: Previous Urgency: {{ $('Full Context').first().json.customFieldsData?.urgency_level || 'NO_EXPRESADO' }} Previous Score: {{ $('Full Context').first().json.previous_score || '0' }} Current Message: {{ $json.currentMessage }}  REGLA ABSOLUTA #1: Si Previous Urgency = 'CRITICO' Y Previous Score >= 8 Y el mensaje actual NO contiene nuevas palabras de urgencia: → SIEMPRE DEVUELVE: {\"urgency_level\": \"CRITICO\", \"pain_points\": [], \"decision_authority\": \"HIGH\", \"urgency_score\": 10}  MENSAJES QUE NO CAMBIAN URGENCIA (mantener previo): - Nombres: \"Soy [nombre]\", \"Me llamo [nombre]\", \"Mi nombre es [nombre]\" - Emails: Cualquier mensaje que sea solo un email - Confirmaciones: \"sí\", \"ok\", \"perfecto\", \"dale\" - Números: Solo teléfonos o números  REGLA #2 - NUEVAS URGENCIAS: Solo cambia el nivel si el mensaje contiene NUEVAS palabras de tiempo/urgencia: - \"urgente\", \"urgentemente\" → CRITICO (10) - \"pronto\", \"esta semana\" → ALTO (7) - \"cuando pueda\", \"eventualmente\" → MEDIO (4) - \"solo viendo\" → BAJO (2)  SI NO HAY NUEVAS PALABRAS DE URGENCIA → MANTÉN EL NIVEL PREVIO  EJEMPLO: Previous: CRITICO, Score: 9 Message: \"Soy Roberto Fernandez\" → DEBE RETORNAR: {\"urgency_level\": \"CRITICO\", \"pain_points\": [], \"decision_authority\": \"HIGH\", \"urgency_score\": 10}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [460, -825],
+      "id": "9f87f18b-3582-4030-addb-e6010e2da1b5",
+      "name": "urgency_level"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [836, -1600],
+      "id": "83b05ca3-c1dc-4089-8a8e-97278656dc6e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "text",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1056, -1600],
+      "id": "6936d496-87cb-4127-bcd5-895c082a1381",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1276, -1600],
+      "id": "ed6d17ff-1f12-4d1d-8d55-75a224ee25aa",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-scores",
+              "name": "extractedScores",
+              "value": "={{ (() => {\n  try {\n    const allTexts = $json.text;\n    \n    // Initialize default values\n    let intentData = { intent_score: 2, primary_intent: 'INFORMACION' };\n    let businessData = { business_score: 0, business_type: 'NO_MENCIONADO' };\n    let urgencyData = { urgency_score: 1, urgency_level: 'NO_EXPRESADO' };\n    \n    // Process each text response\n    for (let i = 0; i < allTexts.length; i++) {\n      try {\n        let textToParse = allTexts[i];\n        \n        // Clean markdown code blocks - handle both ```json\\n and ```json\n        textToParse = textToParse.replace(/```json\\s*/g, '').replace(/```\\s*/g, '').trim();\n        \n        // Also handle potential line breaks\n        textToParse = textToParse.replace(/^\\n+/, '').replace(/\\n+$/, '');\n        \n        // Try to parse\n        const parsed = JSON.parse(textToParse);\n        \n        // Categorize by presence of specific fields\n        if ('intent_score' in parsed || 'primary_intent' in parsed) {\n          intentData = parsed;\n        } else if ('business_score' in parsed || 'business_type' in parsed) {\n          businessData = parsed;\n        } else if ('urgency_score' in parsed || 'urgency_level' in parsed) {\n          urgencyData = parsed;\n        }\n      } catch (e) {\n        // Try one more time with aggressive cleaning\n        try {\n          // Remove all backticks and \"json\" text\n          let cleaned = allTexts[i].replace(/`/g, '').replace(/json/g, '').trim();\n          const parsed = JSON.parse(cleaned);\n          \n          if ('intent_score' in parsed) intentData = parsed;\n          else if ('business_score' in parsed) businessData = parsed;\n          else if ('urgency_score' in parsed) urgencyData = parsed;\n        } catch (e2) {\n          // Skip this text\n        }\n      }\n    }\n    \n    // Return extracted scores with proper values\n    return {\n      intentScore: intentData.intent_score || 2,\n      businessScore: businessData.business_score || 0,\n      urgencyScore: urgencyData.urgency_score || 1,\n      intentType: intentData.primary_intent || 'INFORMACION',\n      businessType: businessData.business_type || 'NO_MENCIONADO',\n      urgencyLevel: urgencyData.urgency_level || 'NO_EXPRESADO'\n    };\n  } catch (e) {\n    return {\n      intentScore: 2,\n      businessScore: 0,\n      urgencyScore: 1,\n      intentType: 'INFORMACION',\n      businessType: 'NO_MENCIONADO',\n      urgencyLevel: 'NO_EXPRESADO'\n    };\n  }\n})() }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1496, -1600],
+      "id": "e0543b2a-4c26-4f4d-82f5-69904f69e269",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Intent Score: {{ $json.extractedScores.intentScore }}\nBusiness Score: {{ $json.extractedScores.businessScore }}\nUrgency Score: {{ $json.extractedScores.urgencyScore }}\nPrevious Score: {{ $('Full Context').first().json.previous_score }}\nHas Hot Tag: {{ $('Full Context').first().json.has_hot_tag }}\nConversation Count: {{ $('Full Context').first().json.conversation_count }}\n\nCurrent Name: {{ $('Full Context').first().json.current_name }}\nCurrent Email: {{ $('Full Context').first().json.current_email }}\nCurrent Goal: {{ $('Full Context').first().json.current_goal }}\nCurrent Budget: {{ $('Full Context').first().json.current_budget }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=CALCULATE THIS SCORE:\n\nBase = ({{ $json.extractedScores.intentScore }} + {{ $json.extractedScores.businessScore }} + {{ $json.extractedScores.urgencyScore }}) / 3\n\nBonuses:\n{{ $('Full Context').first().json.current_name ? '+ 1 (has name)' : '+ 0 (no name)' }}\n{{ $('Full Context').first().json.current_email ? '+ 1 (has email)' : '+ 0 (no email)' }}\n{{ $('Full Context').first().json.current_goal ? '+ 1 (has goal)' : '+ 0 (no goal)' }}\n{{ $('Full Context').first().json.current_budget ? '+ 1 (has budget)' : '+ 0 (no budget)' }}\n{{ $('Full Context').first().json.has_opportunity ? '+ 1 (has opportunity)' : '+ 0 (no opportunity)' }}\n\nFinal = Base + Bonuses\nRound to nearest integer.\nMinimum: {{ $('Full Context').first().json.previous_score || 1 }}\nMaximum: 10\n\nCRITICAL: OUTPUT ONLY A SINGLE NUMBER WITH NO OTHER TEXT. NO WORDS. NO LABELS. JUST THE NUMBER.\nExamples of CORRECT output: 9\nExamples of WRONG output: Final Score: 9, The score is 9, 9 points\n\nOUTPUT:"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [1716, -1600],
+      "id": "38ad109a-ab38-48bc-9565-7bde2b929ed6",
+      "name": "Smart Score Calculator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Full Context').first().json.currentMessage }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Extract customer information from this message.\n\nRETURN ONLY THIS JSON:\n{\n  \"extracted_name\": \"NAME IF FOUND or null\",\n  \"extracted_email\": \"EMAIL IF FOUND or null\", \n  \"extracted_goal\": \"WHAT THEY WANT TO AUTOMATE IF MENTIONED or null\",\n  \"extracted_budget\": \"BUDGET IF CONFIRMED or null\",\n  \"preferred_day\": \"DAY IF MENTIONED or null\",\n  \"preferred_time\": \"TIME IF MENTIONED or null\"\n}\n\nEXTRACTION RULES:\n- Name: ONLY extract if they explicitly say \"soy [name]\", \"me llamo [name]\", \"mi nombre es [name]\"\n  DO NOT extract from signatures, emojis, or casual mentions\n- Email: Any valid email format (must contain @ and domain)\n- Goal: What they want to automate/solve (citas, reservas, pedidos, ventas, etc.)\n- Budget: If they mention specific amounts or confirm budget range\n- Day: If they mention days (lunes, martes, mañana, etc.)\n- Time: If they mention specific times (10am, 2pm, mañana, tarde)\n\nONLY extract if explicitly mentioned. Return null for missing data.\nDo NOT make assumptions or extract partial information."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [1716, -1075],
+      "id": "bb41511f-6961-48f7-9bf4-8d2ad7a46a7b",
+      "name": "Extract Customer Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [2092, -1350],
+      "id": "5fde06e0-059e-44d5-80fb-fa681c690ca4",
+      "name": "Merge Score and Extract"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "current-name",
+              "name": "current_name",
+              "value": "={{ $('Full Context').first().json.current_name }}",
+              "type": "string"
+            },
+            {
+              "id": "current-email",
+              "name": "current_email",
+              "value": "={{ $('Full Context').first().json.current_email }}",
+              "type": "string"
+            },
+            {
+              "id": "current-goal",
+              "name": "current_goal",
+              "value": "={{ $('Full Context').first().json.current_goal }}",
+              "type": "string"
+            },
+            {
+              "id": "current-budget",
+              "name": "current_budget",
+              "value": "={{ $('Full Context').first().json.current_budget }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-extracted",
+              "name": "parsedExtracted",
+              "value": "={{ (() => {\n  try {\n    return JSON.parse($('Extract Customer Data').first().json.text);\n  } catch (e) {\n    return {\n      extracted_name: null,\n      extracted_email: null,\n      extracted_goal: null,\n      extracted_budget: null,\n      preferred_day: null,\n      preferred_time: null\n    };\n  }\n})() }}",
+              "type": "object"
+            },
+            {
+              "id": "final-name",
+              "name": "final_name",
+              "value": "={{ $('Full Context').first().json.current_name || ($json.parsedExtracted.extracted_name || '') }}",
+              "type": "string"
+            },
+            {
+              "id": "final-email",
+              "name": "final_email",
+              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_email || $('Full Context').first().json.current_email || ''; } catch(e) { return $('Full Context').first().json.current_email || ''; } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "final-goal",
+              "name": "final_goal",
+              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_goal || $('Full Context').first().json.current_goal || ''; } catch(e) { return $('Full Context').first().json.current_goal || ''; } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "final-budget",
+              "name": "final_budget",
+              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_budget || $('Full Context').first().json.current_budget || ''; } catch(e) { return $('Full Context').first().json.current_budget || ''; } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "has-new-data",
+              "name": "has_new_data",
+              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return !!(extracted.extracted_goal || extracted.extracted_email || extracted.extracted_budget); } catch(e) { return false; } })() }}",
+              "type": "boolean"
+            },
+            {
+              "id": "conversation-history",
+              "name": "conversation_history",
+              "value": "={{ $('Full Context').first().json.conversationsData }}",
+              "type": "array"
+            },
+            {
+              "id": "all-tags",
+              "name": "all_tags",
+              "value": "={{ $('Full Context').first().json.tagsData }}",
+              "type": "array"
+            },
+            {
+              "id": "all-opportunities",
+              "name": "all_opportunities",
+              "value": "={{ $('Full Context').first().json.opportunitiesData }}",
+              "type": "array"
+            },
+            {
+              "id": "contact-id",
+              "name": "contactId",
+              "value": "={{ $('Edit Fields').first().json.contactId }}",
+              "type": "string"
+            },
+            {
+              "id": "phone-number",
+              "name": "phoneNumber",
+              "value": "={{ $('Edit Fields').first().json.senderNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "score-value",
+              "name": "score",
+              "value": "={{ parseInt($('Smart Score Calculator').first().json.text) || 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "extracted-day",
+              "name": "extracted_day",
+              "value": "={{ $json.parsedExtracted?.preferred_day || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "extracted-time",
+              "name": "extracted_time",
+              "value": "={{ $json.parsedExtracted?.preferred_time || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "always-update",
+              "name": "always_update_fields",
+              "value": "true",
+              "type": "boolean"
+            },
+            {
+              "id": "real-conversation-count",
+              "name": "real_conversation_count",
+              "value": "={{ ($('Full Context').first().json.conversation_count || 0) + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "extracted-intent",
+              "name": "extracted_intent",
+              "value": "={{ $('Edit Fields1').first().json.extractedScores.intentType }}",
+              "type": "string"
+            },
+            {
+              "id": "extracted-business",
+              "name": "extracted_business",
+              "value": "={{ $('Edit Fields1').first().json.extractedScores.businessType }}",
+              "type": "string"
+            },
+            {
+              "id": "extracted-urgency",
+              "name": "extracted_urgency",
+              "value": "={{ $('Edit Fields1').first().json.extractedScores.urgencyLevel }}",
+              "type": "string"
+            },
+            {
+              "id": "name-confirmed-status",
+              "name": "name_confirmed",
+              "value": "={{ $('Full Context').first().json.name_confirmed }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2752, -1350],
+      "id": "3053ef52-8b2f-4692-831f-d88f7f62ae14",
+      "name": "Merge Contact Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [2972, -1350],
+      "id": "292a63c6-6523-4e90-aa3c-83644f4c7c18",
+      "name": "Consolidate Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-new-data-check",
+              "leftValue": "={{ $json.has_new_data || $json.always_update_fields }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [3192, -1875],
+      "id": "af47430c-fc4e-435c-88d8-73c103535676",
+      "name": "Has New Data?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ghl-update-data",
+              "name": "updateData",
+              "value": "={{ (() => {\n  const data = {};\n  \n  // Only update email if it exists and is new\n  if ($json.final_email && $json.final_email !== $json.current_email) {\n    data.email = $json.final_email;\n  }\n  \n  // Build custom fields array - ensure all values are strings\n  const customFields = [];\n  \n  // Always add these fields with proper string conversion\n  customFields.push(\n    {\n      id: 'pXBtZVTCeSbt4IkPkbMJ',\n      value: String($json.final_goal || '')\n    },\n    {\n      id: 'yDZaxGgGo3R5FP5mLvpF',\n      value: String($json.final_budget || '')\n    },\n    {\n      id: 'CRAFCrSWnEGAoFRkglel',\n      value: String($json.score || 1)\n    },\n    {\n      id: 'u4Ie3vKhim879KfHJmmq',\n      value: String($json.extracted_intent || 'UNKNOWN')\n    },\n    {\n      id: 'wam8OzQqDjdxqNfogt5w',\n      value: String($json.extracted_business || 'OTRO')\n    },\n    {\n      id: 'wwEbLQuCDLFclla7tTrw',\n      value: String($json.extracted_urgency || 'LOW')\n    },\n    {\n      id: 'rMel3CO1RPeCOtW0BBvU',\n      value: String($json.extracted_day || '')\n    },\n    {\n      id: 'ca3GZWcuB5TDGoMeXDOD',\n      value: String($json.extracted_time || '')\n    },\n    {\n      id: 'ca4XEOerqDXpVOICnYPP',\n      value: String($json.real_conversation_count || 1)\n    },\n    {\n      id: 'jblcWnjItD7KOZ2FkAPd',\n      value: (() => {\n        // Only update if customer provided name in this message\n        if ($json.parsedExtracted.extracted_name) {\n          return String($json.parsedExtracted.extracted_name);\n        }\n        // Otherwise keep existing verified name\n        return String($json.current_name || '');\n      })()\n    },\n    {\n      id: 'ZIURA2xgUUGcpltqcZRF',\n      value: (() => {\n        // Set to true if we extracted a name in this message\n        if ($json.parsedExtracted.extracted_name) {\n          return 'true';\n        }\n        // Otherwise keep existing status\n        return $json.name_confirmed ? 'true' : 'false';\n      })()\n    }\n  );\n  \n  // Only include custom fields if we have any\n  if (customFields.length > 0) {\n    data.customFields = customFields;\n  }\n  \n  return data;\n})() }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3522, -1875],
+      "id": "44c3de50-264a-462c-b780-ecfc8f1c954d",
+      "name": "Build GHL Request"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.updateData }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3930, -1875],
+      "id": "c25400f7-f442-451f-ba0e-4b68bfc81bdd",
+      "name": "Update GHL Contact"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}/notes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"body\": \"🎯 Lead Score: {{ $node['Consolidate Items'].json.score || 1 }}/10\\n📊 Intent: {{ $node['Consolidate Items'].json.extracted_intent || 'UNKNOWN' }}\\n🏢 Business: {{ $node['Consolidate Items'].json.extracted_business || 'OTRO' }}\\n⚡ Urgency: {{ $node['Consolidate Items'].json.extracted_urgency || 'LOW' }}\\n💬 Total Conversations: {{ $node['Consolidate Items'].json.real_conversation_count || 1 }}\\n🏷️ Tags: {{ ($node['Consolidate Items'].json.all_tags && $node['Consolidate Items'].json.all_tags.length > 0) ? $node['Consolidate Items'].json.all_tags.join(', ') : 'None' }}\\n🎯 Opportunities: {{ ($node['Consolidate Items'].json.all_opportunities && $node['Consolidate Items'].json.all_opportunities.length > 0) ? 'Yes' : 'No' }}\\n\\n📝 Updated: {{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3192, -1675],
+      "id": "e76cd722-ca82-400e-9b38-128579af8c23",
+      "name": "Add Score Note"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}/tags",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"tags\": [\n    \"cold_lead_1to4\",\n    \"warm_lead_5to7\",\n    \"hot_lead_8plus\",\n    \"score_1\",\n    \"score_2\",\n    \"score_3\",\n    \"score_4\",\n    \"score_5\",\n    \"score_6\",\n    \"score_7\",\n    \"score_8\",\n    \"score_9\",\n    \"score_10\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3192, -1200],
+      "id": "8792374f-7745-4b81-95bf-90477c991799",
+      "name": "Remove Old Tags",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ parseInt($node['Consolidate Items'].json.score) }}",
+                    "rightValue": 8,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot Lead \"8=>\""
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ parseInt($node['Consolidate Items'].json.score) }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ parseInt($node['Consolidate Items'].json.score) }}",
+                    "rightValue": 7,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm Lead \"5-7\""
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ parseInt($node['Consolidate Items'].json.score) }}",
+                    "rightValue": 4,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold Lead \"4=<\""
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [3192, -1000],
+      "id": "5b0d92a0-48e0-4d1b-8207-397e8cace012",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=MENSAJE ACTUAL: {{ $('Json Parse').first().json.messageContent }}\n\nDATOS DEL CLIENTE:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Preferred Day: {{ $json.extracted_day || 'NONE' }}\n- Preferred Time: {{ $json.extracted_time || 'NONE' }}\n\nCONTEXTO COMPLETO:\n- Score: {{ $json.score }}/10\n- Intent: {{ $json.extracted_intent }}\n- Business: {{ $json.extracted_business }}\n- Conversations: {{ $json.real_conversation_count }}\n- Has Opportunity: {{ $json.all_opportunities.length > 0 }}\n- Name Confirmed: {{ $json.name_confirmed }}",
+        "options": {
+          "systemMessage": "=Eres un closer experto para leads HOT (puntuación 8-10). Cliente con score {{ $json.score }}/10.\n\nDATOS ACTUALES:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Business: {{ $json.extracted_business }}\n- Conversation #{{ $json.real_conversation_count }}\n\n## REGLAS DE RESPUESTA (MÁXIMO 1-2 PREGUNTAS):\n\n1. If MISSING Verified Name → \"¡Perfecto! Veo que {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }} necesita automatización urgente. ¿Tu nombre para personalizar la estrategia?\"\n\n2. If HAS Verified Name but MISSING Email → \"{{ $json.final_name }}! Para {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }}, ¿cuál es el mejor email para enviarte el ROI personalizado?\"\n\n3. If HAS Name+Email but MISSING Goal → \"{{ $json.final_name }}, con tu presupuesto podemos hacer maravillas. ¿Qué proceso específico automatizamos primero?\"\n\n4. If HAS Name+Email+Goal but MISSING Budget → \"{{ $json.final_name }}, perfecto para automatizar {{ $json.final_goal }}. La inversión empieza en $500. ¿Te funciona?\"\n\n5. If ALL PRESENT → \"🎯 {{ $json.final_name }}, ¡TODO LISTO para automatizar {{ $json.final_goal }}!\n\n   Con tu presupuesto de {{ $json.final_budget }}, podemos empezar esta misma semana.\n   \n   Tengo estos horarios disponibles:\n   📅 Martes: 10:00 AM, 2:00 PM, 4:00 PM\n   📅 Miércoles: 11:00 AM, 3:00 PM\n   📅 Jueves: 10:00 AM, 1:00 PM\n   \n   ¿Cuál prefieres?\"\n\n6. If TIME CHOSEN → \"🎯 ¡CONFIRMADO {{ $json.final_name }}!\n   \n   📅 Cita: {{ $json.extracted_day || 'Martes' }} a las {{ $json.extracted_time || '2:00 PM' }}\n   🎯 Objetivo: Automatizar {{ $json.final_goal }}\n   💰 Inversión: {{ $json.final_budget }}\n   📧 Confirmación enviada a: {{ $json.final_email }}\n   \n   Te llegará recordatorio 1 hora antes. ¡Prepárate para transformar tu {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}!\"\n\nIMPORTANTE:\n- Solo pregunta por información que realmente falta\n- NO uses el firstName de WhatsApp, solo verified_name\n- MÁXIMO 2 preguntas por mensaje\n- Si conversación > 10, sé más directo\n- Si ya tiene oportunidad, menciona \"actualizando tu caso\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [3444, -1475],
+      "id": "989c4d49-c8b0-4c99-9fb0-e1462fa9bcd8",
+      "name": "Hot Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=MENSAJE ACTUAL: {{ $('Json Parse').first().json.messageContent }}\n\nDATOS DEL CLIENTE:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n\nCONTEXTO:\n- Score: {{ $json.score }}/10\n- Business: {{ $json.extracted_business }}\n- Intent: {{ $json.extracted_intent }}\n- Conversations: {{ $json.real_conversation_count }}\n- Name Confirmed: {{ $json.name_confirmed }}",
+        "options": {
+          "systemMessage": "=Eres un closer para leads WARM (puntuación 5-7). Cliente con score {{ $json.score }}/10.\n\nDATOS ACTUALES:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Business: {{ $json.extracted_business }}\n- Conversation #{{ $json.real_conversation_count }}\n\n## REGLAS (MÁXIMO 1-2 PREGUNTAS):\n\n1. If MISSING Verified Name → \"¡Gran potencial! {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'Para tu ' + $json.extracted_business.toLowerCase() : 'Para tu negocio' }}, ¿cuál es tu nombre?\"\n\n2. If HAS Verified Name but MISSING Email → \"{{ $json.final_name }}, tengo casos de éxito de {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() + 's' : 'negocios' }} similares. ¿Dónde te los envío?\"\n\n3. If HAS Name+Email but MISSING Goal → \"{{ $json.final_name }}, ¿qué proceso te quita más tiempo en tu {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}?\"\n\n4. If HAS Name+Email+Goal but MISSING Budget → \"{{ $json.final_name }}, automatizar {{ $json.final_goal }} requiere inversión desde $500 mensual. ¿Encaja en tu presupuesto?\"\n\n5. If ALL PRESENT → \"{{ $json.final_name }}, como {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}, pierdes aproximadamente $2000-5000/mes sin automatizar {{ $json.final_goal }}.\n\n   🎯 Caso real: Un {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }} similar automatizó y ahora:\n   • Ahorra 20 horas/semana\n   • Aumentó ventas 35%\n   • ROI en 3 meses\n   \n   ¿Te muestro exactamente cómo lo lograron?\"\n\nSi conversation_count > 5: \"{{ $json.final_name }}, hemos hablado varias veces. ¿Qué te detiene para empezar?\"\n\nIMPORTANTE: Solo usa verified_name, nunca el firstName de WhatsApp."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [3852, -1025],
+      "id": "a63c0b64-266b-4700-bb97-e4dfa55997d9",
+      "name": "Warm Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=MENSAJE ACTUAL: {{ $('Json Parse').first().json.messageContent }}\n\nDATOS DEL CLIENTE:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n\nCONTEXTO:\n- Score: {{ $json.score }}/10\n- Business: {{ $json.extracted_business }}\n- Conversations: {{ $json.real_conversation_count }}\n- Name Confirmed: {{ $json.name_confirmed }}",
+        "options": {
+          "systemMessage": "=Eres un activador para leads COLD (puntuación 1-4). Cliente con score {{ $json.score }}/10.\n\nDATOS ACTUALES:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Business: {{ $json.extracted_business }}\n- Conversation #{{ $json.real_conversation_count }}\n\n## REGLAS (MÁXIMO 1 PREGUNTA):\n\n1. If MISSING Verified Name → \"Hola! Sin presión. ¿Tu nombre?\"\n\n2. If HAS Verified Name but MISSING Email → \"{{ $json.final_name }}, ¿dónde te mando info sin compromiso?\"\n\n3. If HAS Name+Email but MISSING Goal → \"{{ $json.final_name }}, si pudieras automatizar algo en tu {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}, ¿qué sería?\"\n\n4. If HAS Name+Email+Goal but MISSING Budget → \"{{ $json.final_name }}, por transparencia: automatizar {{ $json.final_goal }} parte de $500. ¿Vale la pena seguir?\"\n\n5. If ALL PRESENT → \"{{ $json.final_name }}, entiendo que automatizar {{ $json.final_goal }} no es prioridad ahora.\n   \n   Solo para que sepas: cada mes sin automatización pierdes:\n   • 30 horas en tareas repetitivas\n   • 10 clientes por respuesta lenta\n   \n   Cuando sea tu momento, aquí estaré 📱\"\n\nSi conversation_count > 3: \"{{ $json.final_name }}, no es tu momento. ¡Éxito! 🙌\"\n\nIMPORTANTE:\n- Solo 1 pregunta por mensaje\n- NO uses el firstName de WhatsApp\n- Solo usa verified_name\n- Sé directo, amable, sin insistir"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [3852, -525],
+      "id": "a74c9e18-8f05-41b7-a358-8de9f9f674ac",
+      "name": "Cold Agent"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}/tags",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"tags\": [\n    \"hot_lead_8plus\", \n    \"ready_to_close\", \n    \"score_{{ $('Consolidate Items').first().json.score }}\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3522, -1675],
+      "id": "72cffefb-c1e2-4346-956b-24aeefca2f74",
+      "name": "Add Hot Tag"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}/tags",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"tags\": [\n    \"warm_lead_5to7\", \n    \"nurture_required\", \n    \"score_{{ $('Consolidate Items').first().json.score }}\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3522, -1075],
+      "id": "c2c091ee-d030-406c-81ce-4f2d44fa6f55",
+      "name": "Add Warm Tag"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $('Edit Fields').first().json.contactId }}/tags",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"tags\": [\n    \"cold_lead_1to4\", \n    \"needs_activation\", \n    \"score_{{ $('Consolidate Items').first().json.score }}\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3522, -725],
+      "id": "374f38a1-634a-4335-aeeb-fd6030150327",
+      "name": "Add Cold Tag"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-booking-confirm",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "CONFIRMADO",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [3930, -1375],
+      "id": "196c14a0-dab4-48ad-898e-ed5277f46369",
+      "name": "Check If Booking"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/opportunities/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"pipelineId\": \"{{ $('Edit Fields').first().json.config.pipelineId }}\",\n  \"locationId\": \"{{ $('Edit Fields').first().json.config.locationId }}\",\n  \"name\": \"{{ $('Merge Contact Data').first().json.final_name }} - Automatización {{ $('Merge Contact Data').first().json.final_goal }}\",\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.pipelineStageId }}\",\n  \"status\": \"open\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"monetaryValue\": 500,\n  \"assignedTo\": \"{{ $('Edit Fields').first().json.config.assignedUserId }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4306, -1575],
+      "id": "491dbecc-0334-4c81-9cbc-c429d9933846",
+      "name": "Create Opportunity"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/calendars/events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"calendarId\": \"{{ $('Edit Fields').first().json.config.calendarId }}\",\n  \"title\": \"Consultoría - {{ $('Merge Contact Data').first().json.final_name }}\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"startTime\": \"{{ $('Parse Booking DateTime').first().json.startTime }}\",\n  \"endTime\": \"{{ $('Parse Booking DateTime').first().json.endTime }}\",\n  \"appointmentStatus\": \"confirmed\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4604, -1375],
+      "id": "9cf809a4-2348-4066-b4a7-54cfa872dd0c",
+      "name": "Book Calendar"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "start-time",
+              "name": "startTime",
+              "value": "={{ \n  const day = $('Merge Contact Data').first().json.extracted_day;\n  const time = $('Merge Contact Data').first().json.extracted_time;\n  \n  let targetDate = $now;\n  \n  // Handle day parsing\n  if (day === 'mañana') {\n    targetDate = targetDate.plus({ days: 1 });\n  } else if (day === 'pasado mañana') {\n    targetDate = targetDate.plus({ days: 2 });\n  } else if (day && day.includes('lunes')) {\n    while (targetDate.weekday !== 1) {\n      targetDate = targetDate.plus({ days: 1 });\n    }\n  } else if (day && day.includes('martes')) {\n    while (targetDate.weekday !== 2) {\n      targetDate = targetDate.plus({ days: 1 });\n    }\n  }\n  \n  // Handle time parsing\n  let hour = 10;\n  let minute = 0;\n  \n  if (time === '10:00 AM' || time === '10AM') {\n    hour = 10;\n  } else if (time === '2:00 PM' || time === '2PM') {\n    hour = 14;\n  } else if (time === '4:00 PM' || time === '4PM') {\n    hour = 16;\n  }\n  \n  targetDate.set({ hour, minute, second: 0 }).toISO()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "end-time",
+              "name": "endTime",
+              "value": "={{ \n  DateTime.fromISO($json.startTime).plus({ minutes: 30 }).toISO()\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [4306, -1375],
+      "id": "09204739-acd0-4cf1-9d5a-146c1f438992",
+      "name": "Parse Booking DateTime"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a message formatter ONLY. DO NOT generate new content or answer questions.\n\nYour ONLY job is to format the input message for WhatsApp delivery.\n\nRULES:\n1. If the message is short (under 300 characters), put it all in part_1\n2. If the message is long, split it at natural breaking points\n3. NEVER add content, NEVER answer questions, NEVER create responses\n4. Always return empty strings \"\" for unused parts, NEVER use null\n5. Keep all emojis and formatting exactly as provided\n\nInput message to format:\n{{ $json.output }}\n\nReturn JSON with part_1, part_2, and part_3 as strings. Use empty string \"\" for unused parts."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [4228, -800],
+      "id": "1bc20f4a-38d7-4674-8a3d-cd7998f2422e",
+      "name": "Response Formatter"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"response\": {\n    \"part_1\": \"Primera parte del mensaje\",\n    \"part_2\": \"Segunda parte (opcional)\",\n    \"part_3\": \"Tercera parte (opcional)\"\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [4376, -580],
+      "name": "Structured Output Parser",
+      "id": "ad66ed02-f502-4756-aaea-1b36f11f0131"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/conversations/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_1) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4604, -800],
+      "id": "380b5b82-22b1-4476-84c5-2d82e352489f",
+      "name": "Send Part1",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-part2-exists",
+              "leftValue": "={{ $('Response Formatter').first().json.output.response.part_2 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [4824, -800],
+      "name": "If Part 2",
+      "id": "33479bb3-26d9-48f1-bb06-fb74fd7ba12c"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 3+$('Response Formatter').first().json.output.response.part_2.length*0.01 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [5044, -725],
+      "name": "Wait Before Part2",
+      "id": "76c0cd4f-6ea9-4f56-aad9-1231014b48c5",
+      "webhookId": "wait-part2-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/conversations/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_2) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5264, -725],
+      "id": "2d1ae554-3d41-42fb-b8e5-a85f8c7ef795",
+      "name": "Send Part2",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-part3-exists",
+              "leftValue": "={{ $('Response Formatter').first().json.output.response.part_3 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [5484, -725],
+      "name": "If Part 3",
+      "id": "24ad6608-29e0-4a7d-b8e9-206537f752e9"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 3+$('Response Formatter').first().json.output.response.part_3.length*0.01 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [5704, -650],
+      "name": "Wait Before Part3",
+      "id": "03392397-0a94-412b-aebf-1bdf6110a877",
+      "webhookId": "wait-part3-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/conversations/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_3) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5924, -650],
+      "id": "5522f0e6-5300-4fe6-8268-ea8d8c4b4a06",
+      "name": "Send Part3",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [6160, -840],
+      "name": "End Workflow",
+      "id": "cb35276a-ec52-4195-997e-bca26ed98da2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [3412, -1255],
+      "id": "873b3fbc-a91f-409e-8854-07d27420dde5",
+      "name": "Hot Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4ntYa6xlW25M8W0Q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [3880, -805],
+      "id": "4bbd61a7-07e7-4118-938f-bdb00bdb826c",
+      "name": "Warm Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4ntYa6xlW25M8W0Q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [3880, -305],
+      "id": "633c63d4-97e0-407a-8f52-e719150d6ffe",
+      "name": "Cold Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4ntYa6xlW25M8W0Q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [548, -1680],
+      "id": "986d1832-a526-4dec-b71d-6355fa907b6d",
+      "name": "Intent Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8iXHmPn6JG2nYFui",
+          "name": "TuPlanta"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [548, -1180],
+      "id": "e0a472d3-c732-4028-a783-f0550433dbf1",
+      "name": "Business Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8iXHmPn6JG2nYFui",
+          "name": "TuPlanta"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [548, -605],
+      "id": "72373d2c-96d7-4272-a0ff-9969f7654cf6",
+      "name": "Urgency Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8iXHmPn6JG2nYFui",
+          "name": "TuPlanta"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [1804, -1380],
+      "id": "66381ae4-1eaf-450e-baee-993f88c4ce9c",
+      "name": "Score Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8iXHmPn6JG2nYFui",
+          "name": "TuPlanta"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [1804, -855],
+      "id": "8af00877-26dc-41a1-9efa-ec1829d18aeb",
+      "name": "Extract Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8iXHmPn6JG2nYFui",
+          "name": "TuPlanta"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [4256, -580],
+      "id": "5349bb2b-757f-4e88-b361-39a8db25cf34",
+      "name": "Formatter Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "4ntYa6xlW25M8W0Q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').first().json.memoryKey }}",
+        "tableName": "n8n_chat_histories_sales_houston",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [3532, -1255],
+      "id": "ee02df25-d075-45f8-8308-1533097e826b",
+      "name": "Hot Memory",
+      "credentials": {
+        "postgres": {
+          "id": "lcUT2RRDoSxFnZcT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').first().json.memoryKey }}",
+        "tableName": "n8n_chat_histories_sales_houston",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [4000, -805],
+      "id": "648cd16c-84c2-43e0-b01f-2a96df7665e2",
+      "name": "Warm Memory",
+      "credentials": {
+        "postgres": {
+          "id": "lcUT2RRDoSxFnZcT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').first().json.memoryKey }}",
+        "tableName": "n8n_chat_histories_sales_houston",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [4000, -305],
+      "id": "b9e4254a-ed71-40cd-acb8-f411666d343c",
+      "name": "Cold Memory",
+      "credentials": {
+        "postgres": {
+          "id": "lcUT2RRDoSxFnZcT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-field",
+              "name": "config",
+              "value": {
+                "apiKey": "Bearer pit-caeccf3f-fe09-4bbf-a279-bdefa5e57b98",
+                "locationId": "j1F264MGsBFACNi0z7qE",
+                "pipelineId": "R9weZgQV0X39CChGWrLe",
+                "pipelineStageId": "91de090a-025b-4db5-9f64-2c5afd54f111",
+                "assignedUserId": "Zspxf2LGW9LMmKVwhpJk",
+                "calendarId": "n4pFLaivSwM1OR8ABSLb"
+              },
+              "type": "object"
+            },
+            {
+              "id": "2fac2947-0bec-45b5-900a-8fd61dc1fc32",
+              "name": "senderNumber",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "19757fc1-76d1-4d3e-8c47-95e42c6ca560",
+              "name": "messageBody",
+              "value": "={{ $json.body.message || $json.body.text || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "3ef3f864-33dc-4592-b758-81ea0edf93d0",
+              "name": "thread_id",
+              "value": "={{ $json.body.phone.replace(\"+\", \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "244056ca-5fbb-4d01-9e20-a0e4007a2308",
+              "name": "memoryKey",
+              "value": "={{ 'ghl_' + $json.body.phone.replace(/\\D/g, \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "79493ec9-a117-496c-88bf-65254c376d20",
+              "name": "message.chatId",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "1208a065-1670-40c7-9b9d-5c8c87cedd3f",
+              "name": "message.messageType",
+              "value": "={{ $json.body.mediaUrl || $json.body.media_url || $json.body.attachments ? 'media' : 'text' }}",
+              "type": "string"
+            },
+            {
+              "id": "2e0a8ca5-35b9-4d4d-9005-1e66ac828eeb",
+              "name": "message.messageContent",
+              "value": "={{ $json.body.message || $json.body.text || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "2f72443f-eace-44fa-8a81-5f3bf1ab5e88",
+              "name": "message.messageTimeStamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "c536e307-3baa-4ad8-bab5-4cd710f1ca99",
+              "name": "contactId",
+              "value": "={{ $json.body.id || $json.body.contactId || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "message-id-field",
+              "name": "message.messageId",
+              "value": "={{ $json.body.messageId || $json.body.message_id || $json.body.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "location-id-field",
+              "name": "locationId",
+              "value": "j1F264MGsBFACNi0z7qE",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2840, -1125],
+      "id": "9d7c5766-2f7e-42f1-b6da-7df1eb3b4ddd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Use this tool to get available calendar slots when a customer is ready to book. The tool returns slots for the next 7 days.\n\nRESPONSE FORMAT:\nThe tool returns dates with available time slots. Each slot is in ISO format (e.g., \"2025-06-03T10:00:00-04:00\").\n\nHOW TO USE:\n1. Call this tool when customer confirms budget and is ready to schedule\n2. Extract the dates and times from the response\n3. Present 3-5 convenient options to the customer in a friendly format\n\nEXAMPLE FORMATTING:\nFor slot \"2025-06-03T10:00:00-04:00\", display as:\n\"📅 Martes 3 de Junio: 10:00 AM\"\n\nIMPORTANT: Only show 3-5 options to avoid overwhelming the customer. Focus on popular times like 10 AM, 2 PM, and 4 PM.",
+        "url": "https://services.leadconnectorhq.com/calendars/n4pFLaivSwM1OR8ABSLb/free-slots",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $now.toMillis() }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $now.plus({days: 7}).toMillis() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer pit-caeccf3f-fe09-4bbf-a279-bdefa5e57b98"
+            },
+            {
+              "name": "Version",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [3652, -1255],
+      "id": "fec6eff6-b6b6-4586-b4a5-0567d4d2969c",
+      "name": "Get Available Time Slots"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "text",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [2312, -1350],
+      "id": "222ce58f-58bc-487d-8172-5ee2fbd2e935",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2532, -1350],
+      "id": "da847190-996d-414a-b336-fe6b5c320fa8",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [240, -1300],
+      "id": "65ef78a5-8686-46a5-9cf9-8fd3bfd37e7c",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "contact-data",
+              "name": "contactData",
+              "value": "={{ $('Get Contact Profile').first().json.contact || {} }}",
+              "type": "object"
+            },
+            {
+              "id": "custom-fields-data",
+              "name": "customFieldsData",
+              "value": "={{ (() => {\n  const contact = $('Get Contact Profile').first().json.contact || {};\n  const fields = {};\n  \n  const fieldMapping = {\n    'pXBtZVTCeSbt4IkPkbMJ': 'goal',\n    'yDZaxGgGo3R5FP5mLvpF': 'budget',\n    'CRAFCrSWnEGAoFRkglel': 'last_score',\n    'u4Ie3vKhim879KfHJmmq': 'last_intent',\n    'wam8OzQqDjdxqNfogt5w': 'business_type',\n    'wwEbLQuCDLFclla7tTrw': 'urgency_level',\n    'rMel3CO1RPeCOtW0BBvU': 'preferred_day',\n    'ca3GZWcuB5TDGoMeXDOD': 'preferred_time',\n    'jblcWnjItD7KOZ2FkAPd': 'verified_name',\n    'ZIURA2xgUUGcpltqcZRF': 'name_confirmed',\n    'ca4XEOerqDXpVOICnYPP': 'message_count'\n  };\n  \n  if (contact.customFields && Array.isArray(contact.customFields)) {\n    contact.customFields.forEach(field => {\n      const fieldName = fieldMapping[field.id];\n      if (fieldName && field.value !== undefined && field.value !== null) {\n        fields[fieldName] = String(field.value);\n      }\n    });\n  }\n  \n  // Ensure all fields have defaults\n  fields.goal = fields.goal || '';\n  fields.budget = fields.budget || '';\n  fields.last_score = fields.last_score || '0';\n  fields.last_intent = fields.last_intent || 'UNKNOWN';\n  fields.business_type = fields.business_type || 'NO_MENCIONADO';\n  fields.urgency_level = fields.urgency_level || 'NO_EXPRESADO';\n  fields.preferred_day = fields.preferred_day || '';\n  fields.preferred_time = fields.preferred_time || '';\n  fields.message_count = fields.message_count || '0';\n  fields.verified_name = fields.verified_name || '';\n  fields.name_confirmed = fields.name_confirmed || 'false';\n  \n  return fields;\n})() }}",
+              "type": "object"
+            },
+            {
+              "id": "conversations-data",
+              "name": "conversationsData",
+              "value": "={{ $('Get All Conversations').first().json.conversations || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "tags-data",
+              "name": "tagsData",
+              "value": "={{ $json.tags || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "opportunities-data",
+              "name": "opportunitiesData",
+              "value": "={{ $('Get Opportunities').first().json.opportunities || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "current-message",
+              "name": "currentMessage",
+              "value": "={{ $('Json Parse').first().json.messageContent || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "current-name",
+              "name": "current_name",
+              "value": "={{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const nameField = contact.customFields.find(f => f.id === 'jblcWnjItD7KOZ2FkAPd'); return nameField?.value || ''; } return ''; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "current-email",
+              "name": "current_email",
+              "value": "={{ $('Get Contact Profile').first().json.contact?.email || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "current-goal",
+              "name": "current_goal",
+              "value": "={{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const goalField = contact.customFields.find(f => f.id === 'pXBtZVTCeSbt4IkPkbMJ'); return goalField?.value || ''; } return ''; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "current-budget",
+              "name": "current_budget",
+              "value": "=\n{{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const budgetField = contact.customFields.find(f => f.id === 'yDZaxGgGo3R5FP5mLvpF'); return budgetField?.value || ''; } return ''; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "previous-score",
+              "name": "previous_score",
+              "value": "={{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const scoreField = contact.customFields.find(f => f.id === 'CRAFCrSWnEGAoFRkglel'); return scoreField?.value || '0'; } return '0'; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "previous-intent",
+              "name": "previous_intent",
+              "value": "=\n{{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const intentField = contact.customFields.find(f => f.id === 'u4Ie3vKhim879KfHJmmq'); return intentField?.value || 'UNKNOWN'; } return 'UNKNOWN'; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "previous-business",
+              "name": "previous_business",
+              "value": "={{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const businessField = contact.customFields.find(f => f.id === 'wam8OzQqDjdxqNfogt5w'); return businessField?.value || 'NO_MENCIONADO'; } return 'NO_MENCIONADO'; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "conversation-count",
+              "name": "conversation_count",
+              "value": "={{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const countField = contact.customFields.find(f => f.id === 'ca4XEOerqDXpVOICnYPP'); return parseInt(countField?.value || '0'); } return 0; })() }}",
+              "type": "number"
+            },
+            {
+              "id": "has-hot-tag",
+              "name": "has_hot_tag",
+              "value": "={{ ($json.tagsData && $json.tagsData.length > 0 && $json.tagsData.some(tag => tag && tag.includes && tag.includes('hot_lead'))) || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "has-opportunity",
+              "name": "has_opportunity",
+              "value": "={{ ($('Get Opportunities').first().json.opportunities && $('Get Opportunities').first().json.opportunities.length > 0) || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "name-confirmed",
+              "name": "name_confirmed",
+              "value": "=\n{{ (() => { const contact = $('Get Contact Profile').first().json.contact || {}; if (contact.customFields && Array.isArray(contact.customFields)) { const confirmedField = contact.customFields.find(f => f.id === 'ZIURA2xgUUGcpltqcZRF'); return confirmedField?.value === 'true'; } return false; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [20, -1300],
+      "id": "208f276f-a68c-4965-b78e-e116a0cf07eb",
+      "name": "Full Context"
+    }
+  ],
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact Profile": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Custom Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Conversations": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Custom Fields": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Get Tags": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Get Opportunities": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Image URL Available?": {
+      "main": [
+        [
+          {
+            "node": "push mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Media Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "push mensaje": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "obtener todos mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener todos mensajes": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Skip Flow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "borrar todos mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "borrar todos mensajes": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Json Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Json Parse": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mensaje": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Build Context": {
+      "main": [
+        [
+          {
+            "node": "Full Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "primary_intent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "business_type": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "urgency_level": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Smart Score Calculator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart Score Calculator": {
+      "main": [
+        [
+          {
+            "node": "Merge Score and Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Customer Data": {
+      "main": [
+        [
+          {
+            "node": "Merge Score and Extract",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Score and Extract": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Contact Data": {
+      "main": [
+        [
+          {
+            "node": "Consolidate Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidate Items": {
+      "main": [
+        [
+          {
+            "node": "Has New Data?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Score Note",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Remove Old Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Data?": {
+      "main": [
+        [
+          {
+            "node": "Build GHL Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GHL Request": {
+      "main": [
+        [
+          {
+            "node": "Update GHL Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Old Tags": {
+      "main": [[]]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Hot Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Hot Tag",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Warm Tag",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cold Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Cold Tag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot Agent": {
+      "main": [
+        [
+          {
+            "node": "Check If Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Warm Agent": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cold Agent": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Booking": {
+      "main": [
+        [
+          {
+            "node": "Create Opportunity",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parse Booking DateTime",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Booking DateTime": {
+      "main": [
+        [
+          {
+            "node": "Book Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Send Part1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Part1": {
+      "main": [
+        [
+          {
+            "node": "If Part 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Part 2": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Part2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "End Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Part2": {
+      "main": [
+        [
+          {
+            "node": "Send Part2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Part2": {
+      "main": [
+        [
+          {
+            "node": "If Part 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Part 3": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Part3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "End Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Part3": {
+      "main": [
+        [
+          {
+            "node": "Send Part3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Part3": {
+      "main": [
+        [
+          {
+            "node": "End Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hot Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Warm Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Warm Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cold Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Cold Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "primary_intent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "business_type",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Urgency Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "urgency_level",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Smart Score Calculator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Customer Data",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatter Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Hot Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Warm Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Warm Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cold Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Cold Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Image URL Available?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Profile",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get All Conversations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Available Time Slots": {
+      "ai_tool": [
+        [
+          {
+            "node": "Hot Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate2": {
+      "main": [
+        [
+          {
+            "node": "Merge Contact Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "primary_intent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "business_type",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "urgency_level",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Full Context": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook1": [
+      {
+        "headers": {
+          "host": "n8n.srv811498.hstgr.cloud",
+          "user-agent": "axios/0.21.4",
+          "content-length": "162",
+          "accept": "application/json, text/plain, */*",
+          "content-type": "application/json",
+          "x-forwarded-for": "35.239.238.13",
+          "x-forwarded-host": "n8n.srv811498.hstgr.cloud",
+          "x-forwarded-port": "443",
+          "x-forwarded-proto": "https",
+          "x-forwarded-server": "c1c9881955c4",
+          "x-real-ip": "35.239.238.13",
+          "accept-encoding": "gzip"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "id": "SWBfwNNaxWMQ83DVmu2z",
+          "name": "Jaime Ortiz",
+          "email": "roberto@italianobistro.com",
+          "phone": "(305) 487-0475",
+          "message": "Sí, perfecto. Empecemos cuanto antes"
+        },
+        "webhookUrl": "https://n8n.srv811498.hstgr.cloud/webhook/c60a001c-3699-4cb1-94da-84948fefcd33",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7f082da5361edcc86f8a35c81a8e8b8aa274fdc81eca11d325134271263ce30"
+  }
+}
