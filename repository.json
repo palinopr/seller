@@ -949,7 +949,7 @@
         "promptType": "define",
         "text": "=MENSAJE ACTUAL: {{ $('Json Parse').first().json.messageContent }}\n\nDATOS DEL CLIENTE:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Preferred Day: {{ $json.extracted_day || 'NONE' }}\n- Preferred Time: {{ $json.extracted_time || 'NONE' }}\n\nCONTEXTO COMPLETO:\n- Score: {{ $json.score }}/10\n- Intent: {{ $json.extracted_intent }}\n- Business: {{ $json.extracted_business }}\n- Conversations: {{ $json.real_conversation_count }}\n- Has Opportunity: {{ $json.all_opportunities.length > 0 }}\n- Name Confirmed: {{ $json.name_confirmed }}",
         "options": {
-          "systemMessage": "=Eres un closer experto para leads HOT (puntuación 8-10). Cliente con score {{ $json.score }}/10.\n\nDATOS ACTUALES:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Business: {{ $json.extracted_business }}\n- Conversation #{{ $json.real_conversation_count }}\n\n## REGLAS DE RESPUESTA (MÁXIMO 1-2 PREGUNTAS):\n\n1. If MISSING Verified Name → \"¡Perfecto! Veo que {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }} necesita automatización urgente. ¿Tu nombre para personalizar la estrategia?\"\n\n2. If HAS Verified Name but MISSING Email → \"{{ $json.final_name }}! Para {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }}, ¿cuál es el mejor email para enviarte el ROI personalizado?\"\n\n3. If HAS Name+Email but MISSING Goal → \"{{ $json.final_name }}, con tu presupuesto podemos hacer maravillas. ¿Qué proceso específico automatizamos primero?\"\n\n4. If HAS Name+Email+Goal but MISSING Budget → \"{{ $json.final_name }}, perfecto para automatizar {{ $json.final_goal }}. La inversión empieza en $500. ¿Te funciona?\"\n\n5. If ALL PRESENT → \"🎯 {{ $json.final_name }}, ¡TODO LISTO para automatizar {{ $json.final_goal }}!\n\n   Con tu presupuesto de {{ $json.final_budget }}, podemos empezar esta misma semana.\n   \n   Tengo estos horarios disponibles:\n   📅 Martes: 10:00 AM, 2:00 PM, 4:00 PM\n   📅 Miércoles: 11:00 AM, 3:00 PM\n   📅 Jueves: 10:00 AM, 1:00 PM\n   \n   ¿Cuál prefieres?\"\n\n6. If TIME CHOSEN → \"🎯 ¡CONFIRMADO {{ $json.final_name }}!\n   \n   📅 Cita: {{ $json.extracted_day || 'Martes' }} a las {{ $json.extracted_time || '2:00 PM' }}\n   🎯 Objetivo: Automatizar {{ $json.final_goal }}\n   💰 Inversión: {{ $json.final_budget }}\n   📧 Confirmación enviada a: {{ $json.final_email }}\n   \n   Te llegará recordatorio 1 hora antes. ¡Prepárate para transformar tu {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}!\"\n\nIMPORTANTE:\n- Solo pregunta por información que realmente falta\n- NO uses el firstName de WhatsApp, solo verified_name\n- MÁXIMO 2 preguntas por mensaje\n- Si conversación > 10, sé más directo\n- Si ya tiene oportunidad, menciona \"actualizando tu caso\""
+          "systemMessage": "=Eres un closer experto para leads HOT (puntuación 8-10). Cliente con score {{ $json.score }}/10.\n\nDATOS ACTUALES:\n- Verified Name: {{ $json.final_name || 'MISSING' }}\n- Email: {{ $json.final_email || 'MISSING' }}\n- Goal: {{ $json.final_goal || 'MISSING' }}\n- Budget: {{ $json.final_budget || 'MISSING' }}\n- Business: {{ $json.extracted_business }}\n- Conversation #{{ $json.real_conversation_count }}\n\n## REGLAS DE RESPUESTA (MÁXIMO 1-2 PREGUNTAS):\n\n1. If MISSING Verified Name → \"¡Perfecto! Veo que {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }} necesita automatización urgente. ¿Tu nombre para personalizar la estrategia?\"\n\n2. If HAS Verified Name but MISSING Email → \"{{ $json.final_name }}! Para {{ $json.extracted_business !== 'NO_MENCIONADO' ? 'tu ' + $json.extracted_business.toLowerCase() : 'tu negocio' }}, ¿cuál es el mejor email para enviarte el ROI personalizado?\"\n\n3. If HAS Name+Email but MISSING Goal → \"{{ $json.final_name }}, con tu presupuesto podemos hacer maravillas. ¿Qué proceso específico automatizamos primero?\"\n\n4. If HAS Name+Email+Goal but MISSING Budget → \"{{ $json.final_name }}, perfecto para automatizar {{ $json.final_goal }}. La inversión empieza en $500. ¿Te funciona?\"\n\n5. If ALL PRESENT → \"🎯 {{ $json.final_name }}, ¡TODO LISTO para automatizar {{ $json.final_goal }}!\n\n   Con tu presupuesto de {{ $json.final_budget }}, podemos empezar esta misma semana.\n   \n   Tengo estos horarios disponibles:\n   📅 Martes: 10:00 AM, 2:00 PM, 4:00 PM\n   📅 Miércoles: 11:00 AM, 3:00 PM\n   📅 Jueves: 10:00 AM, 1:00 PM\n   \n   ¿Cuál prefieres?\"\n\n6. If TIME CHOSEN → \"🎯 ¡CONFIRMADO {{ $json.final_name }}!\n   \n   📅 Cita: {{ $json.extracted_day || 'Martes' }} a las {{ $json.extracted_time || '2:00 PM' }}\n   🎯 Objetivo: Automatizar {{ $json.final_goal }}\n   💰 Inversión: {{ $json.final_budget }}\n   📧 Confirmación enviada a: {{ $json.final_email }}\n   \n   Te llegará recordatorio 1 hora antes. ¡Prepárate para transformar tu {{ $json.extracted_business !== 'NO_MENCIONADO' ? $json.extracted_business.toLowerCase() : 'negocio' }}!\"\n\n7. BOOKING DETECTION: If user responds with day/time selection (martes 2pm, el martes a las 2, quiero el martes), include '📅 Cita:' in response to trigger booking flow.\n\nIMPORTANTE:\n- Solo pregunta por información que realmente falta\n- NO uses el firstName de WhatsApp, solo verified_name\n- MÁXIMO 2 preguntas por mensaje\n- Si conversación > 10, sé más directo\n- Si ya tiene oportunidad, menciona \"actualizando tu caso\""
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -1088,9 +1088,27 @@
                 "type": "string",
                 "operation": "contains"
               }
+            },
+            {
+              "id": "check-calendar-booking",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "📅 Cita:",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "check-appointment-set",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Confirmación enviada a:",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
@@ -1099,6 +1117,61 @@
       "position": [3930, -1375],
       "id": "196c14a0-dab4-48ad-898e-ed5277f46369",
       "name": "Check If Booking"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/opportunities/search?contact_id={{ $('Edit Fields').first().json.contactId }}&location_id={{ $('Edit Fields').first().json.config.locationId }}&status=open",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4150, -1475],
+      "id": "4e8f7b2c-check-opportunity",
+      "name": "Check Existing Opportunity"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-opp-exists",
+              "leftValue": "={{ $json.opportunities && $json.opportunities.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [4300, -1475],
+      "id": "5f9a8d3e-opportunity-exists",
+      "name": "Opportunity Exists?"
     },
     {
       "parameters": {
@@ -1125,9 +1198,38 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [4306, -1575],
+      "position": [4450, -1575],
       "id": "491dbecc-0334-4c81-9cbc-c429d9933846",
       "name": "Create Opportunity"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Opportunity Exists?').first().json.opportunities && $('Opportunity Exists?').first().json.opportunities.length > 0 ? 'https://services.leadconnectorhq.com/opportunities/' + $('Check Existing Opportunity').first().json.opportunities[0].id : 'https://services.leadconnectorhq.com/opportunities/' + $('Create Opportunity').first().json.opportunity.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.bookedStageId }}\",\n  \"status\": \"open\",\n  \"name\": \"{{ $('Merge Contact Data').first().json.final_name }} - Cita Agendada\",\n  \"monetaryValue\": 500\n}",
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4750, -1475],
+      "id": "6a7b9c0d-update-stage",
+      "name": "Update Opportunity Stage"
     },
     {
       "parameters": {
@@ -1154,7 +1256,7 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [4604, -1375],
+      "position": [4900, -1375],
       "id": "9cf809a4-2348-4066-b4a7-54cfa872dd0c",
       "name": "Book Calendar"
     },
@@ -1165,7 +1267,7 @@
             {
               "id": "start-time",
               "name": "startTime",
-              "value": "={{ \n  const day = $('Merge Contact Data').first().json.extracted_day;\n  const time = $('Merge Contact Data').first().json.extracted_time;\n  \n  let targetDate = $now;\n  \n  // Handle day parsing\n  if (day === 'mañana') {\n    targetDate = targetDate.plus({ days: 1 });\n  } else if (day === 'pasado mañana') {\n    targetDate = targetDate.plus({ days: 2 });\n  } else if (day && day.includes('lunes')) {\n    while (targetDate.weekday !== 1) {\n      targetDate = targetDate.plus({ days: 1 });\n    }\n  } else if (day && day.includes('martes')) {\n    while (targetDate.weekday !== 2) {\n      targetDate = targetDate.plus({ days: 1 });\n    }\n  }\n  \n  // Handle time parsing\n  let hour = 10;\n  let minute = 0;\n  \n  if (time === '10:00 AM' || time === '10AM') {\n    hour = 10;\n  } else if (time === '2:00 PM' || time === '2PM') {\n    hour = 14;\n  } else if (time === '4:00 PM' || time === '4PM') {\n    hour = 16;\n  }\n  \n  targetDate.set({ hour, minute, second: 0 }).toISO()\n}}",
+              "value": "={{ \n  const day = $('Merge Contact Data').first().json.extracted_day || $('Hot Agent').first().json.output.match(/martes|miércoles|jueves|lunes|viernes/i)?.[0];\n  const time = $('Merge Contact Data').first().json.extracted_time || $('Hot Agent').first().json.output.match(/\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)|\\d{1,2}(?:am|pm)/i)?.[0];\n  \n  let targetDate = $now;\n  \n  // Handle day parsing\n  const dayMap = {\n    'lunes': 1,\n    'martes': 2,\n    'miércoles': 3,\n    'miercoles': 3,\n    'jueves': 4,\n    'viernes': 5\n  };\n  \n  if (day === 'mañana') {\n    targetDate = targetDate.plus({ days: 1 });\n  } else if (day && dayMap[day.toLowerCase()]) {\n    const targetDay = dayMap[day.toLowerCase()];\n    while (targetDate.weekday !== targetDay) {\n      targetDate = targetDate.plus({ days: 1 });\n    }\n  }\n  \n  // Handle time parsing\n  let hour = 14; // Default 2PM\n  let minute = 0;\n  \n  if (time) {\n    const timeLower = time.toLowerCase();\n    if (timeLower.includes('10') && timeLower.includes('am')) hour = 10;\n    else if (timeLower.includes('2') && timeLower.includes('pm')) hour = 14;\n    else if (timeLower.includes('4') && timeLower.includes('pm')) hour = 16;\n    else if (timeLower.includes('11') && timeLower.includes('am')) hour = 11;\n    else if (timeLower.includes('3') && timeLower.includes('pm')) hour = 15;\n  }\n  \n  targetDate.set({ hour, minute, second: 0 }).toISO()\n}}",
               "type": "string"
             },
             {
@@ -1659,6 +1761,9 @@
                 "locationId": "j1F264MGsBFACNi0z7qE",
                 "pipelineId": "R9weZgQV0X39CChGWrLe",
                 "pipelineStageId": "91de090a-025b-4db5-9f64-2c5afd54f111",
+                "bookedStageId": "YOUR_BOOKED_STAGE_ID_HERE",
+                "wonStageId": "YOUR_WON_STAGE_ID_HERE",
+                "lostStageId": "YOUR_LOST_STAGE_ID_HERE",
                 "assignedUserId": "Zspxf2LGW9LMmKVwhpJk",
                 "calendarId": "n4pFLaivSwM1OR8ABSLb"
               },
@@ -1928,6 +2033,35 @@
       "position": [20, -1300],
       "id": "208f276f-a68c-4965-b78e-e116a0cf07eb",
       "name": "Full Context"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://services.leadconnectorhq.com/opportunities/search?contact_id={{ $('Edit Fields').first().json.contactId }}&status=open",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.lostStageId }}\",\n  \"status\": \"lost\",\n  \"monetaryValue\": 0\n}",
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4100, -325],
+      "id": "7b8c9d0e-update-lost",
+      "name": "Update to Lost Stage"
     }
   ],
   "connections": {
@@ -2383,6 +2517,11 @@
             "node": "Response Formatter",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Update to Lost Stage",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -2394,6 +2533,11 @@
             "node": "Response Formatter",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Update to Lost Stage",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -2402,7 +2546,7 @@
       "main": [
         [
           {
-            "node": "Create Opportunity",
+            "node": "Check Existing Opportunity",
             "type": "main",
             "index": 0
           },
@@ -2420,6 +2564,57 @@
         [
           {
             "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Opportunity Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Opportunity Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Opportunity Stage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Update Opportunity Stage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Opportunity Stage": {
+      "main": [
+        [
+          {
+            "node": "Book Calendar",
             "type": "main",
             "index": 0
           }
