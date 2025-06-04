@@ -1764,6 +1764,9 @@
                 "bookedStageId": "YOUR_BOOKED_STAGE_ID_HERE",
                 "wonStageId": "YOUR_WON_STAGE_ID_HERE",
                 "lostStageId": "YOUR_LOST_STAGE_ID_HERE",
+                "qualifyingStageId": "YOUR_QUALIFYING_STAGE_ID",
+                "nurturingStageId": "YOUR_NURTURING_STAGE_ID",
+                "reEngagedStageId": "YOUR_REENGAGED_STAGE_ID",
                 "assignedUserId": "Zspxf2LGW9LMmKVwhpJk",
                 "calendarId": "n4pFLaivSwM1OR8ABSLb"
               },
@@ -2062,6 +2065,121 @@
       "position": [4100, -325],
       "id": "7b8c9d0e-update-lost",
       "name": "Update to Lost Stage"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/opportunities/search?contact_id={{ $('Edit Fields').first().json.contactId }}&location_id={{ $('Edit Fields').first().json.config.locationId }}&status=open",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3300, -1600],
+      "id": "check-hot-opportunity",
+      "name": "Check Hot Opportunity"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/opportunities/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"pipelineId\": \"{{ $('Edit Fields').first().json.config.pipelineId }}\",\n  \"locationId\": \"{{ $('Edit Fields').first().json.config.locationId }}\",\n  \"name\": \"{{ $('Merge Contact Data').first().json.final_name }} - HOT Lead\",\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.qualifyingStageId }}\",\n  \"status\": \"open\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"monetaryValue\": 500,\n  \"assignedTo\": \"{{ $('Edit Fields').first().json.config.assignedUserId }}\"\n}",
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3600, -1700],
+      "id": "create-hot-opportunity",
+      "name": "Create Hot Opportunity"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-booking-success",
+              "leftValue": "={{ $('Book Calendar').first().json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [5100, -1475],
+      "id": "booking-success-check",
+      "name": "Booking Success?",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Check Existing Opportunity').first().json.opportunities && $('Check Existing Opportunity').first().json.opportunities.length > 0 ? 'https://services.leadconnectorhq.com/opportunities/' + $('Check Existing Opportunity').first().json.opportunities[0].id : 'https://services.leadconnectorhq.com/opportunities/' + $('Create Opportunity').first().json.opportunity.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $('Edit Fields').first().json.config.apiKey }}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.qualifyingStageId }}\",\n  \"status\": \"open\",\n  \"name\": \"{{ $('Merge Contact Data').first().json.final_name }} - ERROR: Calendar Booking Failed\",\n  \"monetaryValue\": 500\n}",
+        "options": {},
+        "continueOnFail": true
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5300, -1375],
+      "id": "rollback-opportunity",
+      "name": "Rollback Opportunity"
     }
   ],
   "connections": {
@@ -2342,6 +2460,17 @@
         ]
       ]
     },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Aggregate1": {
       "main": [
         [
@@ -2463,7 +2592,7 @@
       "main": [
         [
           {
-            "node": "Hot Agent",
+            "node": "Check Hot Opportunity",
             "type": "main",
             "index": 0
           },
@@ -2967,6 +3096,90 @@
         [
           {
             "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Hot Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Create Hot Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Hot Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Hot Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Book Calendar": {
+      "main": [
+        [
+          {
+            "node": "Booking Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Success?": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rollback Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Hot Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Create Hot Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Hot Opportunity": {
+      "main": [
+        [
+          {
+            "node": "Hot Agent",
             "type": "main",
             "index": 0
           }
