@@ -484,7 +484,7 @@
             {
               "id": "extract-scores",
               "name": "extractedScores",
-              "value": "={{ (() => {\n  try {\n    const allTexts = $json.text;\n    \n    // Initialize default values\n    let intentData = { intent_score: 2, primary_intent: 'INFORMACION' };\n    let businessData = { business_score: 0, business_type: 'NO_MENCIONADO' };\n    let urgencyData = { urgency_score: 1, urgency_level: 'NO_EXPRESADO' };\n    \n    // Process each text response\n    for (let i = 0; i < allTexts.length; i++) {\n      try {\n        let textToParse = allTexts[i];\n        \n        // Clean markdown code blocks more aggressively\n        textToParse = textToParse\n          .replace(/\`\`\`json\\s*/gi, '')\n          .replace(/\`\`\`\\s*/g, '')\n          .replace(/^\\s*\\n+/g, '')\n          .replace(/\\s*\\n+$/g, '')\n          .trim();\n        \n        // Try to find JSON object in the text\n        const jsonMatch = textToParse.match(/\{[\\s\\S]*\\}/);\n        if (jsonMatch) {\n          textToParse = jsonMatch[0];\n        }\n        \n        const parsed = JSON.parse(textToParse);\n        \n        // Categorize by presence of specific fields\n        if ('intent_score' in parsed || 'primary_intent' in parsed) {\n          intentData = parsed;\n        } else if ('business_score' in parsed || 'business_type' in parsed) {\n          businessData = parsed;\n        } else if ('urgency_score' in parsed || 'urgency_level' in parsed) {\n          urgencyData = parsed;\n        }\n      } catch (e) {\n        console.log('Parse error for text ' + i + ':', e.message);\n      }\n    }\n    \n    // Return extracted scores with proper values\n    return {\n      intentScore: intentData.intent_score || 2,\n      businessScore: businessData.business_score || 0,\n      urgencyScore: urgencyData.urgency_score || 1,\n      intentType: intentData.primary_intent || 'INFORMACION',\n      businessType: businessData.business_type || 'NO_MENCIONADO',\n      urgencyLevel: urgencyData.urgency_level || 'NO_EXPRESADO'\n    };\n  } catch (e) {\n    console.log('Global parse error:', e.message);\n    return {\n      intentScore: 2,\n      businessScore: 0,\n      urgencyScore: 1,\n      intentType: 'INFORMACION',\n      businessType: 'NO_MENCIONADO',\n      urgencyLevel: 'NO_EXPRESADO'\n    };\n  }\n})() }}",
+              "value": "={{ (() => {\n  const texts = $json.text || [];\n  \n  // Default scores\n  const result = {\n    intentScore: 2,\n    businessScore: 0,\n    urgencyScore: 1,\n    intentType: 'INFORMACION',\n    businessType: 'NO_MENCIONADO',\n    urgencyLevel: 'NO_EXPRESADO'\n  };\n  \n  // Try to find and parse JSON from each text\n  texts.forEach(text => {\n    try {\n      // Extract JSON from text (handles markdown, extra text, etc)\n      const jsonMatch = text.match(/\\{(?:[^{}]|(?:\\{[^{}]*\\}))*\\}/);\n      if (!jsonMatch) return;\n      \n      const data = JSON.parse(jsonMatch[0]);\n      \n      // Update result based on what fields exist\n      if ('intent_score' in data) {\n        result.intentScore = data.intent_score;\n        result.intentType = data.primary_intent || result.intentType;\n      }\n      if ('business_score' in data) {\n        result.businessScore = data.business_score;\n        result.businessType = data.business_type || result.businessType;\n      }\n      if ('urgency_score' in data) {\n        result.urgencyScore = data.urgency_score;\n        result.urgencyLevel = data.urgency_level || result.urgencyLevel;\n      }\n    } catch (e) {\n      console.log('Parse error:', e.message);\n    }\n  });\n  \n  return result;\n})() }}",
               "type": "object"
             }
           ]
@@ -504,7 +504,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=CALCULATE THIS SCORE:\n\nBase = ({{ $json.extractedScores.intentScore }} + {{ $json.extractedScores.businessScore }} + {{ $json.extractedScores.urgencyScore }}) / 3\n\nBonuses:\n{{ $('Full Context').first().json.current_name ? '+ 1 (has name)' : '+ 0 (no name)' }}\n{{ $('Full Context').first().json.current_email ? '+ 1 (has email)' : '+ 0 (no email)' }}\n{{ $('Full Context').first().json.current_goal ? '+ 1 (has goal)' : '+ 0 (no goal)' }}\n{{ $('Full Context').first().json.current_budget ? '+ 1 (has budget)' : '+ 0 (no budget)' }}\n{{ $('Full Context').first().json.has_opportunity ? '+ 1 (has opportunity)' : '+ 0 (no opportunity)' }}\n\nFinal = Base + Bonuses\nRound to nearest integer.\nMinimum: {{ $('Full Context').first().json.previous_score || 1 }}\nMaximum: 10\n\nCRITICAL: OUTPUT ONLY A SINGLE NUMBER WITH NO OTHER TEXT. NO WORDS. NO LABELS. JUST THE NUMBER.\nExamples of CORRECT output: 9\nExamples of WRONG output: Final Score: 9, The score is 9, 9 points\n\nOUTPUT:"
+              "message": "Calculate: (({{ $json.extractedScores.intentScore }} + {{ $json.extractedScores.businessScore }} + {{ $json.extractedScores.urgencyScore }}) / 3) + bonuses\n\nBonuses: {{ $('Full Context').first().json.current_name ? 1 : 0 }} + {{ $('Full Context').first().json.current_email ? 1 : 0 }} + {{ $('Full Context').first().json.current_goal ? 1 : 0 }} + {{ $('Full Context').first().json.current_budget ? 1 : 0 }}\n\nMinimum: {{ $('Full Context').first().json.previous_score || 1 }}\nMaximum: 10\n\nOUTPUT ONLY THE NUMBER:"
             }
           ]
         }
@@ -584,19 +584,19 @@
             {
               "id": "final-email",
               "name": "final_email",
-              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_email || $('Full Context').first().json.current_email || ''; } catch(e) { return $('Full Context').first().json.current_email || ''; } })() }}",
+              "value": "={{ $json.parsedExtracted?.extracted_email || $('Full Context').first().json.current_email || '' }}",
               "type": "string"
             },
             {
               "id": "final-goal",
               "name": "final_goal",
-              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_goal || $('Full Context').first().json.current_goal || ''; } catch(e) { return $('Full Context').first().json.current_goal || ''; } })() }}",
+              "value": "={{ $json.parsedExtracted?.extracted_goal || $('Full Context').first().json.current_goal || '' }}",
               "type": "string"
             },
             {
               "id": "final-budget",
               "name": "final_budget",
-              "value": "={{ (() => { try { const extracted = JSON.parse($('Extract Customer Data').first().json.text); return extracted.extracted_budget || $('Full Context').first().json.current_budget || ''; } catch(e) { return $('Full Context').first().json.current_budget || ''; } })() }}",
+              "value": "={{ $json.parsedExtracted?.extracted_budget || $('Full Context').first().json.current_budget || '' }}",
               "type": "string"
             },
             {
@@ -744,7 +744,7 @@
             {
               "id": "ghl-update-data",
               "name": "updateData",
-              "value": "={{ (() => {\n  const data = {};\n  \n  // Only update email if it exists and is new\n  if ($json.final_email && $json.final_email !== $json.current_email) {\n    data.email = $json.final_email;\n  }\n  \n  // Build custom fields array - ensure all values are strings\n  const customFields = [];\n  \n  // Always add these fields with proper string conversion\n  customFields.push(\n    {\n      id: 'pXBtZVTCeSbt4IkPkbMJ',\n      value: String($json.final_goal || '')\n    },\n    {\n      id: 'yDZaxGgGo3R5FP5mLvpF',\n      value: String($json.final_budget || '')\n    },\n    {\n      id: 'CRAFCrSWnEGAoFRkglel',\n      value: String($json.score || 1)\n    },\n    {\n      id: 'u4Ie3vKhim879KfHJmmq',\n      value: String($json.extracted_intent || 'UNKNOWN')\n    },\n    {\n      id: 'wam8OzQqDjdxqNfogt5w',\n      value: String($json.extracted_business || 'OTRO')\n    },\n    {\n      id: 'wwEbLQuCDLFclla7tTrw',\n      value: String($json.extracted_urgency || 'LOW')\n    },\n    {\n      id: 'rMel3CO1RPeCOtW0BBvU',\n      value: String($json.extracted_day || '')\n    },\n    {\n      id: 'ca3GZWcuB5TDGoMeXDOD',\n      value: String($json.extracted_time || '')\n    },\n    {\n      id: 'ca4XEOerqDXpVOICnYPP',\n      value: String($json.real_conversation_count || 1)\n    },\n    {\n      id: 'jblcWnjItD7KOZ2FkAPd',\n      value: (() => {\n        // Only update if customer provided name in this message\n        if ($json.parsedExtracted.extracted_name) {\n          return String($json.parsedExtracted.extracted_name);\n        }\n        // Otherwise keep existing verified name\n        return String($json.current_name || '');\n      })()\n    },\n    {\n      id: 'ZIURA2xgUUGcpltqcZRF',\n      value: (() => {\n        // Set to true if we extracted a name in this message\n        if ($json.parsedExtracted.extracted_name) {\n          return 'true';\n        }\n        // Otherwise keep existing status\n        return $json.name_confirmed ? 'true' : 'false';\n      })()\n    }\n  );\n  \n  // Only include custom fields if we have any\n  if (customFields.length > 0) {\n    data.customFields = customFields;\n  }\n  \n  return data;\n})() }}",
+              "value": "={{ (() => {\n  const updates = {};\n  const current = $('Full Context').first().json;\n  \n  // Only add email if it's new\n  if ($json.final_email && $json.final_email !== current.current_email) {\n    updates.email = $json.final_email;\n  }\n  \n  // Build custom fields\n  const customFields = [];\n  \n  // Check what actually changed\n  const fields = [\n    { id: 'pXBtZVTCeSbt4IkPkbMJ', value: $json.final_goal || '', current: current.current_goal },\n    { id: 'yDZaxGgGo3R5FP5mLvpF', value: $json.final_budget || '', current: current.current_budget },\n    { id: 'CRAFCrSWnEGAoFRkglel', value: String($json.score || 1), current: current.previous_score },\n    { id: 'u4Ie3vKhim879KfHJmmq', value: String($json.extracted_intent || 'UNKNOWN'), current: current.previous_intent },\n    { id: 'wam8OzQqDjdxqNfogt5w', value: String($json.extracted_business || 'OTRO'), current: current.previous_business },\n    { id: 'wwEbLQuCDLFclla7tTrw', value: String($json.extracted_urgency || 'LOW'), current: current.customFieldsData?.urgency_level },\n    { id: 'ca4XEOerqDXpVOICnYPP', value: String($json.real_conversation_count || 1), current: current.conversation_count }\n  ];\n  \n  // Add fields (always update score and counts)\n  fields.forEach(field => {\n    if (field.id === 'CRAFCrSWnEGAoFRkglel' || field.id === 'ca4XEOerqDXpVOICnYPP' || field.value !== field.current) {\n      customFields.push({ id: field.id, value: field.value });\n    }\n  });\n  \n  // Handle name updates\n  if ($json.parsedExtracted?.extracted_name) {\n    customFields.push(\n      { id: 'jblcWnjItD7KOZ2FkAPd', value: $json.parsedExtracted.extracted_name },\n      { id: 'ZIURA2xgUUGcpltqcZRF', value: 'true' }\n    );\n  }\n  \n  if (customFields.length > 0) {\n    updates.customFields = customFields;\n  }\n  \n  return updates;\n})() }}",
               "type": "object"
             }
           ]
@@ -777,7 +777,13 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $json.updateData }}",
-        "options": {}
+        "options": {
+          "timeout": 10000,
+          "redirect": {
+            "followRedirects": true
+          }
+        },
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1114,7 +1120,8 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"pipelineId\": \"{{ $('Edit Fields').first().json.config.pipelineId }}\",\n  \"locationId\": \"{{ $('Edit Fields').first().json.config.locationId }}\",\n  \"name\": \"{{ $('Merge Contact Data').first().json.final_name }} - Automatización {{ $('Merge Contact Data').first().json.final_goal }}\",\n  \"pipelineStageId\": \"{{ $('Edit Fields').first().json.config.pipelineStageId }}\",\n  \"status\": \"open\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"monetaryValue\": 500,\n  \"assignedTo\": \"{{ $('Edit Fields').first().json.config.assignedUserId }}\"\n}",
-        "options": {}
+        "options": {},
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1142,7 +1149,8 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"calendarId\": \"{{ $('Edit Fields').first().json.config.calendarId }}\",\n  \"title\": \"Consultoría - {{ $('Merge Contact Data').first().json.final_name }}\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"startTime\": \"{{ $('Parse Booking DateTime').first().json.startTime }}\",\n  \"endTime\": \"{{ $('Parse Booking DateTime').first().json.endTime }}\",\n  \"appointmentStatus\": \"confirmed\"\n}",
-        "options": {}
+        "options": {},
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1225,7 +1233,8 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_1) }}\n}",
-        "options": {}
+        "options": {},
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1296,7 +1305,8 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_2) }}\n}",
-        "options": {}
+        "options": {},
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1367,7 +1377,8 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"type\": \"WhatsApp\",\n  \"contactId\": \"{{ $('Edit Fields').first().json.contactId }}\",\n  \"message\": {{ JSON.stringify($('Response Formatter').first().json.output.response.part_3) }}\n}",
-        "options": {}
+        "options": {},
+        "continueOnFail": true
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
